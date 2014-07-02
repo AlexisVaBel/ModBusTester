@@ -9,7 +9,7 @@ SOURCES += \
     main.cpp \
     modbus/modbusregister.cpp \
     modbus/modbusprocs.cpp \
-    yaml/yaml_parser.cpp
+    yaml/yamlparser.cpp
 
 OTHER_FILES += \
     serial/qextserialport.pri
@@ -18,4 +18,5 @@ OTHER_FILES += \
 HEADERS += \
     modbus/modbusregister.h \
     modbus/modbusprocs.h \
-    yaml/yaml_parser.h
+    yaml/yamlparser.h
+
