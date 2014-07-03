@@ -6,14 +6,18 @@
 #include <QMap>
 #include <QVariant>
 #include <QString>
+#include <QMapIterator>
+
 
 class YaNode{
 public:
-    explicit    YaNode(QString str,QVariant var);
-    YaNode   *nodeParent;
-    YaNode   *nodeChild;
-    QString   strName;
-    QVariant varValue;
+    explicit    YaNode(QString str, QString val, int iDepth);
+    int                             m_iDepth;
+    bool                          m_bProcessed;
+    QList<YaNode>   *m_lstChild;
+    YaNode                  *m_nodeParent;
+    QString                    m_strName;
+    QString                    m_strValue;
 };
 
 
@@ -23,8 +27,9 @@ class YamlParser : public QObject
 public:
     explicit YamlParser(QObject *parent = 0,QString strPath="");
 
-    void        readConf();
-//    QMap<QString, QString> getParamMapByName(QString strName);
+    void         readConf();
+    void         getParentChildDep();
+    QString  getNextChild(YaNode *nextChild);
 signals:
 
 public slots:

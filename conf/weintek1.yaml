@@ -1,0 +1,25 @@
+# common structure of file
+# no more then one pare alowed using ':'
+# use tabs for dividing each groip of params
+# max tab count is 3 - which allow to use 4 groups (g1-g4)
+#G1 - naming group
+#available: COM, REG,...
+#	G2 - group for parameters
+#	here you can use your own
+#		G3 - group for atributes
+#		available : isread,iswrite with bool type
+#			G4 - group for subatributes (need to think about) 
+COM: 1
+REG:
+	WESH: 1000
+	WESL: 1002
+	NUMH: 1004
+	NUML: 1006
+	OUTWESH: 
+		isread: false
+		iswrite: false
+	OUTWESL:
+		isread: true
+			period: 120
+		iswrite: false
+
