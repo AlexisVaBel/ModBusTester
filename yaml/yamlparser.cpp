@@ -8,19 +8,21 @@
 YaNode::YaNode(QString str, QString val, int iDepth){
     m_strName    =    str;
     m_strValue     =   val;
-    m_iDepth        =   iDepth;
-    m_bProcessed=   false;
+    m_iDepth        =   iDepth;    
     m_nodeParent=  0;
 }
 
 YamlParser::YamlParser(QObject *parent, QString strPath) :
     QObject(parent){
     m_strPath    =strPath;
+    m_nodeRoot=0;
     m_nodePrnt =0;
     m_nodePrev =0;
-    m_iTabCnt   =0;
+    m_iTabCnt   =0;    
 }
 
+// readConf is ok for simple yaml structure
+//*************** reading and preparing structure   ***********************//
 void YamlParser::readConf(){
     QFile file(m_strPath);
     if (!file.open(QIODevice::ReadOnly)){
@@ -39,13 +41,14 @@ void YamlParser::readConf(){
         iTabCur=0;
         strName=inTxt.readLine();
         if(strName.contains("#")) continue; // don`t process comments
-        strLst=strName.split("\t");
-        strName.clear();
+        strLst=strName.split("\t");               // tabs divide to groups
+
         for(int iCnt=0;iCnt<strLst.count();iCnt++){
 
             if (strLst.at(iCnt).isEmpty()){
                 iTabCur++;              
             }else{
+
                 strNode=strLst.at(iCnt).split(":");
                 if(strNode.count()<2)continue;
                 strName=strNode.at(0);
@@ -69,43 +72,49 @@ void YamlParser::readConf(){
 
                 m_stackParse.push(m_nodePrev);
                 node=new YaNode(strName,strVal,iTabCur);
-                node->m_nodeParent=m_nodePrnt;
-                if(m_nodePrnt!=0){
-
-                }
+                node->m_nodeParent=m_nodePrnt;                
                 m_nodePrev=node;
-                m_mapParsed.insert(node->m_strName,node);
+                placeNodeToMap(node);
+                addChildToRoot(m_nodeRoot,node);
+                if(m_nodePrnt!=m_nodeRoot)
+                    addChildToRoot(m_nodePrnt,node);
+
+                if(iTabCur==ROOT_DEPTH){
+                    placeNodeToMap(m_nodeRoot);
+                    m_nodeRoot=node;
+                    m_nodeRoot->m_nodeParent=0;
+                }
             }
         };        
     };
-    m_mapParsed.insert(node->m_strName,node);
-    file.close();    
+    file.close();
+    placeNodeToMap(node);
+    placeNodeToMap(m_nodeRoot);
 }
 
-void YamlParser::getParentChildDep(){
+void YamlParser::addChildToRoot(YaNode *root, YaNode *child){
+    if((root==0)||(child==0)||(root==child))return;
+    if(root->m_iDepth>=child->m_iDepth)return;
+    root->m_lstChild.append(child);
+}
 
+void YamlParser::placeNodeToMap(YaNode *node){
+    if (node==0)return;
+    m_mapParsed.insert(node->m_strName,node);
+}
+//*************// reading and preparing structure   ***********************//
+
+//**************** returning structure for clients    ***********************//
+void YamlParser::getParentChildDep(){
      foreach (YaNode *value, m_mapParsed){
          if(value==0) continue;
          if (value->m_nodeParent==0){
              qDebug()<<"root node is "<<value->m_strName;
+             foreach(YaNode *node, value->m_lstChild){
+                 if(node!=0)qDebug()<<":"<<node->m_strName<<node->m_strValue;
+             }
          }
      }
-//YaNode      *node=0;
-//    QMapIterator<QString, YaNode*> i(m_mapParsed);
-//    while (i.hasNext()) {
-//        i.next();
-//        node=i.value();
-//        if (node==0) continue;
-//        m_nodePrnt=node->m_nodeParent;
-//        if (m_nodePrnt==0){
-//            qDebug()<<node->m_strName;
-//        }else{
-//            qDebug()<<node->m_strName<<" Parent is "<<m_nodePrnt->m_strName;
-//        }
-//        qDebug()<<node->m_strValue;
-//        qDebug()<<node->m_bHasChild;
-//        qDebug()<<" *********";
-//    }
 }
+//**************// returning structure for clients    ***********************//
 
-// YamlNode implementation
